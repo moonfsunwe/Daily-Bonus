@@ -44,6 +44,8 @@ jobs:
           
           # 补齐 urllib3 删掉的 appengine (防止 telegram 库报错)
           python -c "import os; import urllib3; base_path=os.path.join(os.path.dirname(urllib3.__file__), 'contrib'); os.makedirs(base_path, exist_ok=True); open(os.path.join(base_path, 'appengine.py'), 'w').write('class AppEngineManager: pass')"
+
+          $env:PYTHONIOENCODING = "utf-8"
           
           # 运行签到脚本
           python ./message.py
