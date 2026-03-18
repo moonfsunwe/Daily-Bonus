@@ -1,5 +1,5 @@
 name: Daily Bonus
-
+ 
 on:
   push:
     branches:
@@ -11,7 +11,7 @@ jobs:
   checkin:
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [self-hosted]
         # os: [ubuntu-latest, self-hosted]
 
     runs-on: ${{ matrix.os }}
@@ -31,22 +31,22 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set timezone
-        run: sudo timedatectl set-timezone 'Asia/Shanghai'
-
-      - name: Echo current time
-        run: timedatectl
-
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.8'
-          architecture: 'x64'
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
+          # 安装基础库，去掉那个搜不到的 imghdr
+          python -m pip install setuptools requests beautifulsoup4 cloudscraper python-telegram-bot==13.7 pytz lxml cffi
+  
       - name: Check-in
-        run: python ./message.py
+        run: |
+          # 补齐 Python 3.13 删掉的 imghdr
+          python -c "import os; lib_path=os.path.join(os.path.dirname(os.__file__), 'imghdr.py'); open(lib_path, 'w').write('def what(file, h=None): return None')"
+          
+          # 补齐 urllib3 删掉的 appengine (防止 telegram 库报错)
+          python -c "import os; import urllib3; base_path=os.path.join(os.path.dirname(urllib3.__file__), 'contrib'); os.makedirs(base_path, exist_ok=True); open(os.path.join(base_path, 'appengine.py'), 'w').write('class AppEngineManager: pass')"
+
+          $env:PYTHONIOENCODING = "utf-8"
+          
+          # 运行签到脚本
+          python ./message.py
+   
