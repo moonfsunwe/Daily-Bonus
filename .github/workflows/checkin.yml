@@ -38,10 +38,13 @@ jobs:
           python -m pip install setuptools requests beautifulsoup4 cloudscraper python-telegram-bot==13.7 pytz lxml cffi
   
       - name: Check-in
-        # 这里的 run 分为三行：第一行是核心补丁，第二行是运行脚本
         run: |
-          # 手动在你的 Python 库目录里生成一个空的 imghdr.py，彻底骗过 telegram 库
-          python -c "import os; import sys; lib_path = os.path.join(os.path.dirname(os.__file__), 'imghdr.py'); open(lib_path, 'w').write('def what(file, h=None): return None')"
+          # 补齐 Python 3.13 删掉的 imghdr
+          python -c "import os; lib_path=os.path.join(os.path.dirname(os.__file__), 'imghdr.py'); open(lib_path, 'w').write('def what(file, h=None): return None')"
+          
+          # 补齐 urllib3 删掉的 appengine (防止 telegram 库报错)
+          python -c "import os; import urllib3; base_path=os.path.join(os.path.dirname(urllib3.__file__), 'contrib'); os.makedirs(base_path, exist_ok=True); open(os.path.join(base_path, 'appengine.py'), 'w').write('class AppEngineManager: pass')"
+          
           # 运行签到脚本
           python ./message.py
- 
+   
