@@ -5,7 +5,8 @@ on:
     branches:
       - master
   schedule:
-    - cron: '30 23 * * *'
+    - cron: '0 15 * * *' # 北京时间 23:00 自动运行
+  workflow_dispatch:      # 允许你在网页上手动点按钮测试
 
 jobs:
   checkin:
