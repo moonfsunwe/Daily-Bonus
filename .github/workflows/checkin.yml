@@ -34,9 +34,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # 强制安装兼容 Python 3.13 的新版本，不使用 requirements.txt 里的老版本
-          python -m pip install lxml cffi requests beautifulsoup4 cloudscraper python-telegram-bot==13.7 pytz
-
+          # 安装这几个关键补丁
+          python -m pip install setuptools requests beautifulsoup4 cloudscraper python-telegram-bot==13.7 pytz lxml cffi
+          # 专门解决 Python 3.13 缺少 imghdr 的问题
+          python -m pip install imghdr
+          
       - name: Check-in
         run: python ./message.py
  
