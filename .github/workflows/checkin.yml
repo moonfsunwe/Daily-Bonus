@@ -1,17 +1,20 @@
 name: Daily Bonus
-
+ 
 on:
   push:
     branches:
       - master
   schedule:
-    - cron: '30 23 * * *' # 北京时间早上 7:30 自动跑
-  workflow_dispatch:      # 允许你在 GitHub 网页上点按钮手动触发
+    - cron: '30 23 * * *'
 
 jobs:
   checkin:
-    # 彻底放弃 self-hosted，改用 GitHub 官方服务器
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [self-hosted]
+        # os: [ubuntu-latest, self-hosted]
+
+    runs-on: ${{ matrix.os }}
 
     env:
       V2EX_COOKIES: ${{ secrets.V2EX_COOKIES }}
@@ -28,32 +31,22 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10' # 使用稳定的 3.10，避免 3.13 的兼容性问题
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Check-in with Retry
+          # 安装基础库，去掉那个搜不到的 imghdr
+          python -m pip install setuptools requests beautifulsoup4 cloudscraper python-telegram-bot==13.7 pytz lxml cffi
+  
+      - name: Check-in
         run: |
-          n=0
-          # 尝试 15 次，增加撞大运的概率
-          until [ "$n" -ge 15 ]
-          do
-            # 运行脚本
-            python ./message.py && exit 0
-            
-            n=$[$n+1]
-            # 随机等待 30 到 120 秒，避开 Cloudflare 的频率限制
-            wait_time=$((RANDOM % 91 + 30))
-            echo "第 $n 次尝试失败（可能是遇到验证码），等待 ${wait_time} 秒后重试..."
-            sleep $wait_time
-          done
-          exit 1
-            echo "签到失败，可能是 GitHub IP 被论坛封锁，等待 30 秒后进行第 $n 次重试..."
-            sleep 30
-          done
+          # 补齐 Python 3.13 删掉的 imghdr
+          python -c "import os; lib_path=os.path.join(os.path.dirname(os.__file__), 'imghdr.py'); open(lib_path, 'w').write('def what(file, h=None): return None')"
+          
+          # 补齐 urllib3 删掉的 appengine (防止 telegram 库报错)
+          python -c "import os; import urllib3; base_path=os.path.join(os.path.dirname(urllib3.__file__), 'contrib'); os.makedirs(base_path, exist_ok=True); open(os.path.join(base_path, 'appengine.py'), 'w').write('class AppEngineManager: pass')"
+
+          $env:PYTHONIOENCODING = "utf-8"
+          
+          # 运行签到脚本
+          python ./message.py
+   
