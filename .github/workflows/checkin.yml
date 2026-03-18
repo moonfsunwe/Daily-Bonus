@@ -39,13 +39,21 @@ jobs:
           pip install -r requirements.txt
 
       - name: Check-in with Retry
-        # 核心逻辑：如果运行失败，等待并重试，最多 10 次
         run: |
           n=0
-          until [ "$n" -ge 10 ]
+          # 尝试 15 次，增加撞大运的概率
+          until [ "$n" -ge 15 ]
           do
-            python ./message.py && break
+            # 运行脚本
+            python ./message.py && exit 0
+            
             n=$[$n+1]
+            # 随机等待 30 到 120 秒，避开 Cloudflare 的频率限制
+            wait_time=$((RANDOM % 91 + 30))
+            echo "第 $n 次尝试失败（可能是遇到验证码），等待 ${wait_time} 秒后重试..."
+            sleep $wait_time
+          done
+          exit 1
             echo "签到失败，可能是 GitHub IP 被论坛封锁，等待 30 秒后进行第 $n 次重试..."
             sleep 30
           done
