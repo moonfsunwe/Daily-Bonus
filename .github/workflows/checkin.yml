@@ -34,7 +34,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          # 强制安装兼容 Python 3.13 的新版本，不使用 requirements.txt 里的老版本
+          python -m pip install lxml cffi requests beautifulsoup4 cloudscraper python-telegram-bot==13.7 pytz
 
       - name: Check-in
         run: python ./message.py
