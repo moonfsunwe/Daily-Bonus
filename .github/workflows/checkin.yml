@@ -11,7 +11,7 @@ jobs:
   checkin:
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [self-hosted]
         # os: [ubuntu-latest, self-hosted]
 
     runs-on: ${{ matrix.os }}
