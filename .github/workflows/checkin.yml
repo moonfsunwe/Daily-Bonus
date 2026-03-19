@@ -31,23 +31,11 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          # 安装基础库，去掉那个搜不到的 imghdr
-          python -m pip install setuptools requests beautifulsoup4 cloudscraper python-telegram-bot==13.7 pytz lxml cffi
   
       - name: Check-in
         run: |
-          # 补齐 Python 3.13 删掉的 imghdr
-          python -c "import os; lib_path=os.path.join(os.path.dirname(os.__file__), 'imghdr.py'); open(lib_path, 'w').write('def what(file, h=None): return None')"
+          # 1. 之前补齐 3.13 缺失组件的命令（保留以防万一，但只需跑一次）
+          python -c "import os; lib_path=os.path.join(os.path.dirname(os.__file__), 'imghdr.py'); not os.path.exists(lib_path) and open(lib_path, 'w').write('def what(file, h=None): return None')"
           
-          # 补齐 urllib3 删掉的 appengine (防止 telegram 库报错)
-          python -c "import os; import urllib3; base_path=os.path.join(os.path.dirname(urllib3.__file__), 'contrib'); os.makedirs(base_path, exist_ok=True); open(os.path.join(base_path, 'appengine.py'), 'w').write('class AppEngineManager: pass')"
-
-          $env:PYTHONIOENCODING = "utf-8"
-          
-          # 运行签到脚本
+          # 2. 运行签到脚本（因为依赖已经在手机里装好了，直接跑就行）
           python ./message.py
-   
