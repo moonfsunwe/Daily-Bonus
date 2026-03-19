@@ -31,11 +31,10 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-  
+
       - name: Check-in
+        env:
+          PYTHONIOENCODING: "utf-8"
         run: |
-          # 1. 之前补齐 3.13 缺失组件的命令（保留以防万一，但只需跑一次）
-          python -c "import os; lib_path=os.path.join(os.path.dirname(os.__file__), 'imghdr.py'); not os.path.exists(lib_path) and open(lib_path, 'w').write('def what(file, h=None): return None')"
-          
-          # 2. 运行签到脚本（因为依赖已经在手机里装好了，直接跑就行）
+          # 直接运行脚本，因为所有“手术”我们已经在手机终端里做完了
           python ./message.py
