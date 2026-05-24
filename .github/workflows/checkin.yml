@@ -40,10 +40,10 @@ jobs:
           python ./message.py
 
       - name: Commit files to keep repo active
-       run: |
-         git config --local user.email "action@github.com"
-         git config --local user.name "GitHub Action"
-         echo $(date) > keep_alive.txt
-         git add keep_alive.txt
-         git commit -m "🚀 保持仓库活跃防止60天休眠" || exit 0
-         git push origin master
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          echo $(date) > keep_alive.txt
+          git add keep_alive.txt
+          git commit -m "🚀 保持仓库活跃防止60天休眠" || exit 0
+          git push origin master
