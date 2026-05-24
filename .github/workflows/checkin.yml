@@ -8,6 +8,9 @@ on:
     - cron: '30 0 * * *' # 北京时间 8:30 自动运行
   workflow_dispatch:      # 允许你在网页上手动点按钮测试
 
+permissions:
+  contents: write
+  
 jobs:
   checkin:
     strategy:
